@@ -15,5 +15,9 @@ phrases = {
     'unknown_command': {
         'ru': 'Команда не найдена',
         'en': 'unknown command'
+    },
+    'person': {
+        'ru': 'личность',
+        'en': 'writer'
     }
 }

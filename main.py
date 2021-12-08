@@ -17,7 +17,7 @@ def voice_recognition(recognizer, microphone, lang='ru'):
         recognizer.adjust_for_ambient_noise(microphone, duration=2)
         try:
             print("Listening...")
-            audio = recognizer.listen(microphone, 0, 10)
+            audio = recognizer.listen(microphone, 5, 5)
 
         except speech_recognition.WaitTimeoutError:
             print("Can you check if your microphone is on, please?")
@@ -46,25 +46,51 @@ def get_poem(lang):
         return parser.get_random_poem_en(page)
 
 
+def get_person(lang):
+    if lang == 'ru':
+        return parser.get_random_author_ru()
+    elif lang == 'en':
+        return parser.get_random_author_en()
+
+
+def change_lang(eng, lang):
+    id_ = ''
+    if lang == 'en':
+        id_ = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0'
+    elif lang == 'ru':
+        id_ = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_RU-RU_IRINA_11.0'
+    for voice in eng.getProperty('voices'):
+        if id_ == voice.id:
+            eng.setProperty('voice', voice.id)
+            return True
+
+
 def main():
     eng = pyttsx3.init()
     recognizer = speech_recognition.Recognizer()
     microphone = speech_recognition.Microphone()
     language = input('Choose language: en - English, ru - Russian: ')
     print('You choose: ' + language)
-    while True:
-        result = voice_recognition(recognizer, microphone, language)
-        print(result + '\n')
-        if result == phrases['command1'][language]:
-            text = get_poem(language)
-            print(text)
-        elif result == phrases['stop'][language]:
-            text = phrases['off'][language]
-        else:
-            text = phrases['unknown_command'][language]
-        speech_synthesis(eng, text)
-        if result == phrases['stop'][language]:
-            break
+    if change_lang(eng, language):
+        while True:
+            result = voice_recognition(recognizer, microphone, language)
+            if not result:
+                continue
+            print(result + '\n')
+            if result == phrases['command1'][language]:
+                text = get_poem(language)
+                print(text)
+            elif result == phrases['stop'][language]:
+                text = phrases['off'][language]
+            elif result == phrases['person'][language]:
+                text = get_person(language)
+                print(text)
+            else:
+                text = phrases['unknown_command'][language]
+                print(text)
+            speech_synthesis(eng, text)
+            if result == phrases['stop'][language]:
+                break
 
 
 if __name__ == '__main__':
